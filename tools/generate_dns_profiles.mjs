@@ -1,0 +1,662 @@
+import { writeFileSync } from "node:fs";
+
+const generatedAt = "2026-06-07";
+
+const dns = {
+  ali: "223.5.5.5",
+  tencent: "119.29.29.29",
+  baidu: "180.76.76.76",
+  cn: "223.5.5.5",
+  global: "8.8.8.8",
+};
+
+const sources = [
+  "https://github.com/blackmatrix7/ios_rule_script",
+  "https://github.com/blakebill/Proxy-DNS",
+];
+
+const groups = [
+  {
+    name: "China TLD",
+    dns: dns.cn,
+    suffixOnly: true,
+    domains: ["cn"],
+  },
+  {
+    name: "Alibaba / Ant / Amap / Youku",
+    dns: dns.ali,
+    domains: [
+      "alibaba.com",
+      "alicdn.com",
+      "alikunlun.com",
+      "alipay.com",
+      "alipayobjects.com",
+      "aliyun.com",
+      "aliyuncs.com",
+      "amap.com",
+      "autonavi.com",
+      "cainiao.com",
+      "dingtalk.com",
+      "ele.me",
+      "elemecdn.com",
+      "feizhu.com",
+      "fliggy.com",
+      "mmstat.com",
+      "soku.com",
+      "taobao.com",
+      "taobaocdn.com",
+      "tbcache.com",
+      "tbcdn.cn",
+      "tmall.com",
+      "tmall.hk",
+      "uc.cn",
+      "ucweb.com",
+      "xiami.com",
+      "xiami.net",
+      "ykimg.com",
+      "youku.com",
+    ],
+  },
+  {
+    name: "Baidu",
+    dns: dns.baidu,
+    domains: [
+      "baidu.com",
+      "baidubcr.com",
+      "baidustatic.com",
+      "bcebos.com",
+      "bdimg.com",
+      "bdstatic.com",
+      "hao123.com",
+      "qianqian.com",
+      "tieba.com",
+      "yunjiasu-cdn.net",
+    ],
+  },
+  {
+    name: "Tencent / WeChat / QQ",
+    dns: dns.tencent,
+    domains: [
+      "dnspod.cn",
+      "dnspod.com",
+      "gtimg.com",
+      "idqqimg.com",
+      "myapp.com",
+      "myqcloud.com",
+      "qcloud.com",
+      "qpic.cn",
+      "qq.com",
+      "smtcdns.com",
+      "tencent-cloud.com",
+      "tencent-cloud.net",
+      "tencent.com",
+      "tencentcs.com",
+      "tencentmusic.com",
+      "wechat.com",
+      "weishi.com",
+      "weixin.qq.com",
+      "weixinbridge.com",
+    ],
+  },
+  {
+    name: "ByteDance / Douyin",
+    dns: dns.cn,
+    domains: [
+      "bytecdn.cn",
+      "bytedance.com",
+      "byteimg.com",
+      "bytescm.com",
+      "douyin.com",
+      "douyinpic.com",
+      "douyinstatic.com",
+      "feiliao.com",
+      "huoshan.com",
+      "iesdouyin.com",
+      "ixigua.com",
+      "pstatp.com",
+      "snssdk.com",
+      "toutiao.com",
+      "toutiaostatic.com",
+    ],
+  },
+  {
+    name: "Mainland media",
+    dns: dns.cn,
+    domains: [
+      "acgvideo.com",
+      "biliapi.com",
+      "biliapi.net",
+      "bilibili.com",
+      "bilibili.tv",
+      "bilivideo.com",
+      "cctv.com",
+      "cctvpic.com",
+      "cntv.cn",
+      "douyu.com",
+      "douyucdn.cn",
+      "gifshow.com",
+      "hdslb.com",
+      "hitv.com",
+      "hunantv.com",
+      "huya.com",
+      "iqiyi.com",
+      "iqiyipic.com",
+      "ksapisrv.com",
+      "kuaishou.com",
+      "livechina.com",
+      "mgtv.com",
+      "msstatic.com",
+      "qy.net",
+      "xhscdn.com",
+      "xiaohongshu.com",
+    ],
+  },
+  {
+    name: "Mainland commerce / local services",
+    dns: dns.cn,
+    domains: [
+      "360buyimg.com",
+      "dangdang.com",
+      "dianping.com",
+      "jd.com",
+      "jd.hk",
+      "jdpay.com",
+      "meituan.com",
+      "meituan.net",
+      "pinduoduo.com",
+      "sankuai.com",
+      "smzdm.com",
+      "suning.com",
+      "vip.com",
+      "yangkeduo.com",
+    ],
+  },
+  {
+    name: "NetEase / Sina / Sohu / domestic content",
+    dns: dns.tencent,
+    domains: [
+      "126.net",
+      "127.net",
+      "163.com",
+      "163yun.com",
+      "56.com",
+      "douban.com",
+      "doubanio.com",
+      "itc.cn",
+      "lofter.com",
+      "netease.com",
+      "sina.cn",
+      "sina.com",
+      "sogo.com",
+      "sogou.com",
+      "sogoucdn.com",
+      "sohu-inc.com",
+      "sohu.com",
+      "sohucs.com",
+      "v-56.com",
+      "weibo.com",
+      "weibocdn.com",
+      "ydstatic.com",
+      "zhihu.com",
+      "zhimg.com",
+    ],
+  },
+  {
+    name: "China devices / cloud / carriers",
+    dns: dns.cn,
+    domains: [
+      "10010.com",
+      "10086.cn",
+      "12306.cn",
+      "189.cn",
+      "21cn.com",
+      "bootcdn.cn",
+      "chinamobile.com",
+      "chinatelecom.com.cn",
+      "chinaunicom.com",
+      "cnki.net",
+      "coloros.com",
+      "coolapk.com",
+      "csdn.net",
+      "dbankcdn.com",
+      "duokan.com",
+      "gitee.com",
+      "gitee.io",
+      "gov.cn",
+      "heytap.com",
+      "honor.com",
+      "huawei.com",
+      "huaweicloud.com",
+      "iqoo.com",
+      "jianshu.com",
+      "juejin.cn",
+      "lenovo.com",
+      "meizu.com",
+      "mi.com",
+      "mi-img.com",
+      "miui.com",
+      "miwifi.com",
+      "oneplus.com",
+      "oppo.com",
+      "oschina.net",
+      "unionpay.com",
+      "vivo.com",
+      "vivoglobal.com",
+      "vmall.com",
+      "wanfangdata.com.cn",
+      "xiaomi.com",
+    ],
+  },
+  {
+    name: "Apple global services",
+    dns: dns.global,
+    domains: [
+      "aaplimg.com",
+      "apple-cloudkit.com",
+      "apple.com",
+      "appstore.com",
+      "cdn-apple.com",
+      "icloud-content.com",
+      "icloud.com",
+      "me.com",
+      "mzstatic.com",
+    ],
+  },
+  {
+    name: "Apple China endpoint",
+    dns: dns.cn,
+    domains: ["apple.com.cn"],
+  },
+  {
+    name: "Microsoft / GitHub / developer",
+    dns: dns.global,
+    domains: [
+      "atlassian.com",
+      "azureedge.net",
+      "bitbucket.org",
+      "docker.com",
+      "docker.io",
+      "dockerhub.com",
+      "figma.com",
+      "firebaseapp.com",
+      "firebaseio.com",
+      "gitlab.com",
+      "github.com",
+      "github.dev",
+      "github.io",
+      "githubapp.com",
+      "githubassets.com",
+      "githubcopilot.com",
+      "githubusercontent.com",
+      "go.dev",
+      "golang.org",
+      "heroku.com",
+      "jetbrains.com",
+      "jsdelivr.net",
+      "live.com",
+      "microsoft.com",
+      "msecnd.net",
+      "netlify.app",
+      "npmjs.com",
+      "npmjs.org",
+      "office.com",
+      "office365.com",
+      "onedrive.com",
+      "outlook.com",
+      "pypi.org",
+      "python.org",
+      "pythonhosted.org",
+      "rubygems.org",
+      "sharepoint.com",
+      "sourceforge.net",
+      "stackoverflow.com",
+      "stackexchange.com",
+      "supabase.co",
+      "vercel.app",
+      "vercel.com",
+      "visualstudio.com",
+      "windows.com",
+      "windowsupdate.com",
+    ],
+  },
+  {
+    name: "AI services",
+    dns: dns.global,
+    domains: [
+      "ai.com",
+      "ai.google.dev",
+      "alkalimakersuite-pa.clients6.google.com",
+      "algolia.net",
+      "anthropic.com",
+      "api.statsig.com",
+      "apis.google.com",
+      "auth0.com",
+      "bard.google.com",
+      "browser-intake-datadoghq.com",
+      "cdn.usefathom.com",
+      "chat.openai.com.cdn.cloudflare.net",
+      "chatgpt.com",
+      "chatgpt.livekit.cloud",
+      "civitai.com",
+      "claude.ai",
+      "client-api.arkoselabs.com",
+      "cursor.com",
+      "cursor.sh",
+      "deepmind.com",
+      "deepmind.google",
+      "events.statsigapi.net",
+      "featuregates.org",
+      "gemini.google.com",
+      "generativeai.google",
+      "hf.co",
+      "host.livekit.cloud",
+      "huggingface.co",
+      "identrust.com",
+      "intercom.io",
+      "intercomcdn.com",
+      "launchdarkly.com",
+      "makersuite.google.com",
+      "oaistatic.com",
+      "oaiusercontent.com",
+      "observeit.net",
+      "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net",
+      "openaicomproductionae4b.blob.core.windows.net",
+      "openai-api.arkoselabs.com",
+      "openai.com",
+      "openaiapi-site.azureedge.net",
+      "openaicom.imgix.net",
+      "perplexity.ai",
+      "pplx.ai",
+      "poe.com",
+      "proactivebackend-pa.googleapis.com",
+      "production-openaicom-storage.azureedge.net",
+      "quora.com",
+      "segment.io",
+      "sentry.io",
+      "sora.com",
+      "statsigapi.net",
+      "static.cloudflareinsights.com",
+      "turn.livekit.cloud",
+      "windsurf.com",
+    ],
+  },
+  {
+    name: "Google / YouTube",
+    dns: dns.global,
+    domains: [
+      "ggpht.com",
+      "google.com",
+      "googleapis.com",
+      "googleusercontent.com",
+      "googlevideo.com",
+      "gstatic.com",
+      "youtu.be",
+      "youtube-nocookie.com",
+      "youtube.com",
+      "youtubei.googleapis.com",
+      "ytimg.com",
+    ],
+  },
+  {
+    name: "Social / messaging",
+    dns: dns.global,
+    domains: [
+      "cdninstagram.com",
+      "discord.com",
+      "discord.gg",
+      "discordapp.com",
+      "discordapp.net",
+      "facebook.com",
+      "fbcdn.net",
+      "instagram.com",
+      "licdn.com",
+      "line.me",
+      "line-scdn.net",
+      "linkedin.com",
+      "pinimg.com",
+      "pinterest.com",
+      "redd.it",
+      "reddit.com",
+      "redditmedia.com",
+      "t.co",
+      "t.me",
+      "tdesktop.com",
+      "telegram.org",
+      "threads.net",
+      "twimg.com",
+      "twitter.com",
+      "whatsapp.com",
+      "whatsapp.net",
+      "x.com",
+    ],
+  },
+  {
+    name: "Cloud / CDN / security",
+    dns: dns.global,
+    domains: [
+      "amazonaws.com",
+      "aws.amazon.com",
+      "cloudflare-dns.com",
+      "cloudflare.com",
+      "digitalocean.com",
+      "fastly.net",
+      "pages.dev",
+      "workers.dev",
+    ],
+  },
+  {
+    name: "Global media",
+    dns: dns.global,
+    domains: [
+      "byteoversea.com",
+      "disney-plus.net",
+      "disneyplus.com",
+      "dssott.com",
+      "hbomax.com",
+      "hulu.com",
+      "max.com",
+      "netflix.com",
+      "nflximg.net",
+      "nflxso.net",
+      "nflxvideo.net",
+      "scdn.co",
+      "soundcloud.com",
+      "spotify.com",
+      "tiktok.com",
+      "tiktokcdn.com",
+      "tiktokv.com",
+      "ttvnw.net",
+      "twitch.tv",
+      "vimeo.com",
+    ],
+  },
+  {
+    name: "Knowledge / news / scholar",
+    dns: dns.global,
+    domains: [
+      "acm.org",
+      "arxiv.org",
+      "bbc.co.uk",
+      "bbc.com",
+      "bloomberg.com",
+      "clarivate.com",
+      "crossref.org",
+      "doi.org",
+      "elsevier.com",
+      "ieee.org",
+      "jstor.org",
+      "medium.com",
+      "nature.com",
+      "nytimes.com",
+      "orcid.org",
+      "researchgate.net",
+      "reuters.com",
+      "sciencedirect.com",
+      "springer.com",
+      "webofknowledge.com",
+      "wikipedia.org",
+      "wikimedia.org",
+      "wiley.com",
+      "wsj.com",
+    ],
+  },
+  {
+    name: "Payments / crypto",
+    dns: dns.global,
+    domains: [
+      "binance.com",
+      "coinbase.com",
+      "okx.com",
+      "paypal.com",
+      "paypalobjects.com",
+      "stripe.com",
+      "wise.com",
+    ],
+  },
+  {
+    name: "Games",
+    dns: dns.global,
+    domains: [
+      "battle.net",
+      "blizzard.com",
+      "epicgames.com",
+      "steamcdn-a.akamaihd.net",
+      "steamcommunity.com",
+      "steamcontent.com",
+      "steamgames.com",
+      "steampowered.com",
+      "steamstatic.com",
+      "steamusercontent.com",
+      "unrealengine.com",
+    ],
+  },
+];
+
+function normalizedGroups() {
+  const seen = new Map();
+  for (const group of groups) {
+    for (const domain of group.domains) {
+      seen.set(domain, {
+        domain,
+        dns: group.dns,
+        group: group.name,
+        suffixOnly: Boolean(group.suffixOnly),
+      });
+    }
+  }
+
+  const byGroup = new Map();
+  for (const entry of seen.values()) {
+    if (!byGroup.has(entry.group)) byGroup.set(entry.group, []);
+    byGroup.get(entry.group).push(entry);
+  }
+
+  return [...byGroup.entries()].map(([name, entries]) => ({
+    name,
+    entries: entries.sort((a, b) => a.domain.localeCompare(b.domain)),
+  }));
+}
+
+function header(client) {
+  return [
+    `# Proxy-DNS UnGlobal DNS profile for ${client}`,
+    `# Generated: ${generatedAt}`,
+    "# Purpose: mainland-friendly split DNS. CN domains use CN DNS; global/proxy-prone domains use global DNS.",
+    `# References: ${sources.join(" , ")}`,
+    "# CN DNS: 223.5.5.5, 119.29.29.29, 180.76.76.76",
+    "# Global DNS: 8.8.8.8, 1.1.1.1",
+    "",
+  ];
+}
+
+function hostLines(format) {
+  const lines = [];
+  for (const group of normalizedGroups()) {
+    lines.push(`# ${group.name}`);
+    for (const entry of group.entries) {
+      if (!entry.suffixOnly) {
+        lines.push(`${entry.domain} = server:${entry.dns}`);
+      }
+      lines.push(`*.${entry.domain} = server:${entry.dns}`);
+    }
+    lines.push("");
+  }
+  return lines;
+}
+
+function quantumultXLines() {
+  const lines = [];
+  for (const group of normalizedGroups()) {
+    lines.push(`# ${group.name}`);
+    for (const entry of group.entries) {
+      if (!entry.suffixOnly) {
+        lines.push(`server=/${entry.domain}/${entry.dns}`);
+      }
+      lines.push(`server=/*.${entry.domain}/${entry.dns}`);
+    }
+    lines.push("");
+  }
+  return lines;
+}
+
+function surge() {
+  return [
+    ...header("Surge"),
+    "[General]",
+    "dns-server = system, 223.5.5.5, 119.29.29.29, 180.76.76.76, 8.8.8.8, 1.1.1.1",
+    "",
+    "[Host]",
+    ...hostLines("surge"),
+  ].join("\n");
+}
+
+function loon() {
+  return [
+    ...header("Loon"),
+    "[General]",
+    "dns-server = system,119.29.29.29,223.5.5.5,180.76.76.76,8.8.8.8,1.1.1.1",
+    "",
+    "[Host]",
+    ...hostLines("loon"),
+  ].join("\n");
+}
+
+function shadowrocket() {
+  return [
+    ...header("Shadowrocket"),
+    "[General]",
+    "dns-server = 223.5.5.5,119.29.29.29,180.76.76.76,8.8.8.8,1.1.1.1",
+    "fallback-dns-server = 8.8.8.8,1.1.1.1",
+    "ipv6 = false",
+    "",
+    "[Host]",
+    ...hostLines("shadowrocket"),
+  ].join("\n");
+}
+
+function quantumultX() {
+  return [
+    ...header("Quantumult X"),
+    "[dns]",
+    "no-system",
+    "no-ipv6",
+    "server=223.5.5.5",
+    "server=119.29.29.29",
+    "server=180.76.76.76",
+    "server=8.8.8.8",
+    "server=1.1.1.1",
+    "",
+    ...quantumultXLines(),
+  ].join("\n");
+}
+
+const outputs = {
+  "DNS_UnGlobal_Surge.conf": surge(),
+  "DNS_UnGlobal_Loon.conf": loon(),
+  "DNS_UnGlobal_Shadowrocket.conf": shadowrocket(),
+  "DNS_UnGlobal_QuantumultX.conf": quantumultX(),
+};
+
+for (const [file, content] of Object.entries(outputs)) {
+  writeFileSync(file, `${content.trimEnd()}\n`);
+}
